@@ -22,13 +22,13 @@ use Combinations qw(combinations);
     say "day 2";
     my @raw_entries = get_input(2);
     my $valid_count =
-      grep { validate_password($_) }
+      grep { validate_password_sled_shop_rules($_) }
       map  { parse_password_entry($_) } @raw_entries;
     say "there are $valid_count valid passwords";
 
 }
 
-sub validate_password($entry) {
+sub validate_password_sled_shop_rules($entry) {
     my $letters_used = () =
       $entry->{password} =~ m/\Q$entry->{policy}{letter}\E/gi;
     return $letters_used >= $entry->{policy}{min}
