@@ -30,6 +30,23 @@ use Combinations qw(combinations);
       grep { validate_password_toboggan_corporate_policy($_) } @pw_file_entries;
     say
 "there are $valid_count_toboggan_corporate_policy valid password after the toboggan corporate policy.";
+
+    say "day 3";
+
+    my @raw_tree_map = get_input(3);
+    my @tree_map     = map {
+        [ map { $_ eq '#' ? 1 : 0 } split( //, $_ ) ]
+    } @raw_tree_map;
+
+    my $trees_encountered = traverse_tree_map( 0, @tree_map );
+    say "encountered $trees_encountered trees";
+}
+
+sub traverse_tree_map ( $pos, @map ) {
+    no warnings 'recursion';
+    return 0 if !@map;
+    my ( $cur, @rest ) = @map;
+    return $cur->[$pos] + traverse_tree_map( ( $pos + 3 ) % @$cur, @rest );
 }
 
 sub validate_password_toboggan_corporate_policy($entry) {
