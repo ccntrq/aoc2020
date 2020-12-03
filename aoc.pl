@@ -18,6 +18,7 @@ use Combinations qw(combinations);
     my $expense_report = get_input(1);
     my @expenses = split( "\n", $expense_report );
     find_tuple_challenge( 2, @expenses );
+    find_tuple_challenge( 3, @expenses );
 }
 
 sub find_tuple_challenge ( $count, @expenses ) {
