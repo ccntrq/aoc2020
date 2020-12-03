@@ -41,11 +41,8 @@ sub find_target_values ( $count, @expenses ) {
 
 sub get_input($day) {
     local $/ = undef;
-    open(
-        my $fh,
-        '<',
-        File::Spec->catfile( $FindBin::RealBin, qw(input day), $day, 'input' )
-    );
+    open( my $fh, '<',
+        File::Spec->catfile( $FindBin::RealBin, qw(input day), $day ) );
     my $out = <$fh>;
     close $fh;
     return $out;
