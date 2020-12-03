@@ -38,15 +38,27 @@ use Combinations qw(combinations);
         [ map { $_ eq '#' ? 1 : 0 } split( //, $_ ) ]
     } @raw_tree_map;
 
-    my $trees_encountered = traverse_tree_map( 0, @tree_map );
-    say "encountered $trees_encountered trees";
+    my @slopes = map { { right => $_->[0], down => $_->[1] } }
+      ( [ 3, 1 ], [ 1, 1 ], [ 5, 1 ], [ 7, 1 ], [ 1, 2 ] );
+
+    my $trees_encountered = traverse_tree_map( $slopes[0], 0, @tree_map );
+    say "encountered $trees_encountered trees with the first slope";
+
+    my $all_slopes_multiplied =
+      product( map { traverse_tree_map( $_, 0, @tree_map ) } @slopes );
+
+    say "the product of all trees on all slopes is $all_slopes_multiplied";
+
 }
 
-sub traverse_tree_map ( $pos, @map ) {
+sub traverse_tree_map ( $slope, $pos, @map ) {
     no warnings 'recursion';
     return 0 if !@map;
-    my ( $cur, @rest ) = @map;
-    return $cur->[$pos] + traverse_tree_map( ( $pos + 3 ) % @$cur, @rest );
+    my $cur  = $map[0];
+    my @rest = @map[ $slope->{down} ... $#map ];
+
+    return $cur->[$pos] +
+      traverse_tree_map( $slope, ( $pos + $slope->{right} ) % @$cur, @rest );
 }
 
 sub validate_password_toboggan_corporate_policy($entry) {
