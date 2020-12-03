@@ -15,10 +15,9 @@ use lib File::Spec->catfile( $FindBin::RealBin, 'lib' );
 use Combinations qw(combinations);
 
 {
-    my $expense_report = get_input(1);
-    my @expenses = split( "\n", $expense_report );
-    find_tuple_challenge( 2, @expenses );
-    find_tuple_challenge( 3, @expenses );
+    my @expense_report = get_input(1);
+    find_tuple_challenge( 2, @expense_report );
+    find_tuple_challenge( 3, @expense_report );
 }
 
 sub find_tuple_challenge ( $count, @expenses ) {
@@ -40,11 +39,11 @@ sub find_target_values ( $count, @expenses ) {
 }
 
 sub get_input($day) {
-    local $/ = undef;
     open( my $fh, '<',
         File::Spec->catfile( $FindBin::RealBin, qw(input day), $day ) );
-    my $out = <$fh>;
+    my @out = <$fh>;
+    chomp(@out);
     close $fh;
-    return $out;
+    return @out;
 }
 
