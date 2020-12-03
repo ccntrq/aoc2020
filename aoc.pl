@@ -12,14 +12,30 @@ use List::Util qw(sum0 product first);
 use FindBin;
 use lib File::Spec->catfile( $FindBin::RealBin, 'lib' );
 
-use Combinations qw(unique_pairs);
+use Combinations qw(combinations);
 
 {
     my $expense_report = get_input(1);
-    my @expenses       = split( "\n", $expense_report );
-    my $target_pair    = first { sum0(@$_) == 2020 } unique_pairs(@expenses);
-    say sprintf( "%d and %d sum up to 2020 their product is %d",
-        @$target_pair, product(@$target_pair) );
+    my @expenses = split( "\n", $expense_report );
+    find_tuple_challenge( 2, @expenses );
+}
+
+sub find_tuple_challenge ( $count, @expenses ) {
+    my $target = find_target_values( $count, @expenses );
+    say target_value_output($target);
+}
+
+sub target_value_output($target_values) {
+    my $out =
+        join( ' + ', @$target_values )
+      . ' = 2020 their product is '
+      . product(@$target_values);
+    return $out;
+}
+
+sub find_target_values ( $count, @expenses ) {
+    my $target_sum = 2020;
+    first { sum0(@$_) == $target_sum } combinations( $count, @expenses );
 }
 
 sub get_input($day) {
