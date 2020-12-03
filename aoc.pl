@@ -21,11 +21,22 @@ use Combinations qw(combinations);
     find_tuple_challenge( 3, @expense_report );
     say "day 2";
     my @raw_entries = get_input(2);
-    my $valid_count =
-      grep { validate_password_sled_shop_rules($_) }
-      map  { parse_password_entry($_) } @raw_entries;
-    say "there are $valid_count valid passwords";
+    my @pw_file_entries = map { parse_password_entry($_) } @raw_entries;
+    my $valid_count_sled_shop_rules =
+      grep { validate_password_sled_shop_rules($_) } @pw_file_entries;
+    say
+"there are $valid_count_sled_shop_rules valid password after the sled shop policy.";
+    my $valid_count_toboggan_corporate_policy =
+      grep { validate_password_toboggan_corporate_policy($_) } @pw_file_entries;
+    say
+"there are $valid_count_toboggan_corporate_policy valid password after the toboggan corporate policy.";
+}
 
+sub validate_password_toboggan_corporate_policy($entry) {
+    my $count = grep {
+        substr( $entry->{password}, $_ - 1, 1 ) eq $entry->{policy}{letter}
+    } ( @{ $entry->{policy} }{qw(min max)} );
+    return $count == 1;
 }
 
 sub validate_password_sled_shop_rules($entry) {
