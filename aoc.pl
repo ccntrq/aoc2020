@@ -16,8 +16,39 @@ use Combinations qw(combinations);
 
 {
     my @expense_report = get_input(1);
+    say "day 1";
     find_tuple_challenge( 2, @expense_report );
     find_tuple_challenge( 3, @expense_report );
+    say "day 2";
+    my @raw_entries = get_input(2);
+    my $valid_count =
+      grep { validate_password($_) }
+      map  { parse_password_entry($_) } @raw_entries;
+    say "there are $valid_count valid passwords";
+
+}
+
+sub validate_password($entry) {
+    my $letters_used = () =
+      $entry->{password} =~ m/\Q$entry->{policy}{letter}\E/gi;
+    return $letters_used >= $entry->{policy}{min}
+      && $letters_used <= $entry->{policy}{max};
+}
+
+sub parse_password_entry($entry) {
+    my ( $policy, $password ) = split( /\:\s+/, $entry,  2 );
+    my ( $counts, $letter )   = split( /\s+/,   $policy, 2 );
+    my ( $min,    $max )      = split( /-/,     $counts );
+
+    return {
+        password => $password,
+        policy   => {
+            letter => $letter,
+            min    => $min,
+            max    => $max,
+          }
+
+    };
 }
 
 sub find_tuple_challenge ( $count, @expenses ) {
