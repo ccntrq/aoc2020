@@ -7,7 +7,7 @@ use feature qw(say signatures);
 
 no warnings 'experimental::signatures';
 
-use List::Util qw(sum0 product first);
+use List::Util qw(any first sum0 product);
 
 use FindBin;
 use lib File::Spec->catfile( $FindBin::RealBin, 'lib' );
@@ -49,6 +49,70 @@ use Combinations qw(combinations);
 
     say "the product of all trees on all slopes is $all_slopes_multiplied";
 
+    say "day 4";
+    my @raw_passport_entries = get_input( 4, "\n\n" );
+    my $valid_count =
+      grep { $_ } map { scan_passport($_) } @raw_passport_entries;
+    say "there are $valid_count passports in the batch run!";
+
+}
+
+sub scan_passport($entry) {
+    my @parts = split( /\s+/, $entry );
+    my @passport = grep { $_ } map {
+        my ( $key, $value ) = split( /\:/, $_, 2 );
+        if ( validate_passport_rules( $key, $value ) ) { $key => $value }
+    } @parts;
+    my %passport = @passport;
+
+    return
+      unless keys %passport == 8
+      || ( keys %passport == 7 && !exists $passport{cid} );
+
+    return \%passport;
+}
+
+sub between ( $val, $min, $max ) {
+
+    $val >= $min && $val <= $max;
+}
+
+sub validate_passport_rules ( $key, $value ) {
+    my %rules = (
+        byr => sub($val) {
+            return $val =~ /^\d{4}$/ && $val >= 1920 && $val <= 2002;
+        },
+        iyr => sub($val) {
+            return $val =~ /^\d{4}$/ && $val >= 2010 && $val <= 2020;
+        },
+        eyr => sub($val) {
+            return $val =~ /^\d{4}$/ && $val >= 2020 && $val <= 2030;
+        },
+        hgt => sub($val) {
+            if ( $val =~ /^(\d+)(cm|in)$/ ) {
+                my $numval = $1;
+                my $unit   = $2;
+                return ( $unit eq 'cm' && between( $numval, 150, 193 ) )
+                  || ( $unit eq 'in' && between( $numval, 59, 76 ) );
+            }
+            return;
+        },
+        hcl => sub($val) {
+            return $val =~ m/^#[0-9a-f]{6}$/;
+        },
+        ecl => sub ($val) {
+            return any { $val eq $_ } qw(amb blu brn gry grn hzl oth);
+        },
+        pid => sub ($val) {
+            return $val =~ m/^\d{9}$/;
+        },
+        cid => sub($val) {
+            return 1;
+        },
+    );
+
+    my $valid = $rules{$key}->($value);
+    return $valid;
 }
 
 sub traverse_tree_map ( $slope, $pos, @map ) {
@@ -109,11 +173,12 @@ sub find_target_values ( $count, @expenses ) {
     first { sum0(@$_) == $target_sum } combinations( $count, @expenses );
 }
 
-sub get_input($day) {
+sub get_input ( $day, $splitchar = "\n" ) {
+    local $/ = undef;
     open( my $fh, '<',
         File::Spec->catfile( $FindBin::RealBin, qw(input day), $day ) );
-    my @out = <$fh>;
-    chomp(@out);
+    my $out = <$fh>;
+    my @out = split( $splitchar, $out );
     close $fh;
     return @out;
 }
