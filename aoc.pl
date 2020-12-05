@@ -7,7 +7,7 @@ use feature qw(say signatures);
 
 no warnings 'experimental::signatures';
 
-use List::Util qw(any first sum0 product);
+use List::Util qw(any first max sum0 product);
 
 use FindBin;
 use lib File::Spec->catfile( $FindBin::RealBin, 'lib' );
@@ -55,6 +55,62 @@ use Combinations qw(combinations);
       grep { $_ } map { scan_passport($_) } @raw_passport_entries;
     say "there are $valid_count passports in the batch run!";
 
+    say "day 5";
+    my @boarding_passes = get_input(5);
+    my @seat_postions   = map { process_boarding_pass($_) } @boarding_passes;
+    my @seat_ids        = map { calculate_seat_id($_) } @seat_postions;
+    my $highest_seat_id = max(@seat_ids);
+    say "Highest Seat ID: " . $highest_seat_id;
+    say "My Seat ID: " . find_missing_seat_id( \@seat_postions, \@seat_ids );
+
+}
+
+sub find_missing_seat_id ( $seat_positions, $seat_ids ) {
+    my %seat_ids = map { $_ => 1 } @{$seat_ids};
+
+    my %position_lookup;
+    for my $pos ( @{$seat_positions} ) {
+        $position_lookup{ $pos->[0] }{ $pos->[1] } = 1;
+    }
+
+    for my $row ( 1 .. 126 ) {
+        for my $seat ( 0 .. 7 ) {
+            next if $position_lookup{$row}{$seat};
+            my $id = calculate_seat_id( [ $row, $seat ] );
+            next if !( $seat_ids{ $id + 1 } && $seat_ids{ $id - 1 } );
+            return $id;
+        }
+    }
+
+}
+
+sub calculate_seat_id($pass) {
+    return $pass->[0] * 8 + $pass->[1];
+}
+
+sub process_boarding_pass($pass) {
+    my @partitions = split( '', $pass );
+    my @row_ops    = @partitions[ 0 .. 6 ];
+    my @seat_ops   = @partitions[ 7 .. 9 ];
+
+    my $row  = ( partition( \@row_ops,  0 .. 127 ) )[0];
+    my $seat = ( partition( \@seat_ops, 0 .. 7 ) )[0];
+
+    return [ $row, $seat ];
+}
+
+sub partition ( $ops, @list ) {
+    for my $op (@$ops) {
+        my $mid = @list / 2;
+        if ( $op eq 'F' || $op eq 'L' ) {
+            @list = @list[ 0 ... ( $mid - 1 ) ];
+        }
+        if ( $op eq 'B' || $op eq 'R' ) {
+            @list = @list[ $mid .. $#list ];
+        }
+    }
+
+    return @list;
 }
 
 sub scan_passport($entry) {
