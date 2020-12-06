@@ -65,16 +65,29 @@ use Combinations qw(combinations);
 
     say "day 6";
     my @declaration_form_answers = map {
+        my @lines = split( /\n/, $_ );
+        my %answers;
+        map { $answers{$_}++ } split( '', join( '', @lines ) );
+
         {
-            map { $_ => 1 } grep { /[a-z]/ } split( //, $_ )
+            group_size => scalar @lines,
+            answers    => \%answers,
         }
     } get_input( 6, "\n\n" );
 
-    my $total_answers = sum0 (map {scalar keys %$_  } @declaration_form_answers);
-    say "Total Answers: $total_answers"
+    my $total_answers =
+      sum0( map { scalar keys %{ $_->{answers} } } @declaration_form_answers );
+    say "Total Answers: $total_answers";
 
+    my $all_answered = sum0(
+        map {
+            my %group = %$_;
+            scalar grep { $group{answers}{$_} == $group{group_size} }
+              keys %{ $group{answers} };
+        } @declaration_form_answers
+    );
+    say "All Answered: $all_answered";
 }
-
 
 sub find_missing_seat_id ( $seat_positions, $seat_ids ) {
     my %seat_ids = map { $_ => 1 } @{$seat_ids};
