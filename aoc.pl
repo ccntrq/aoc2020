@@ -63,7 +63,18 @@ use Combinations qw(combinations);
     say "Highest Seat ID: " . $highest_seat_id;
     say "My Seat ID: " . find_missing_seat_id( \@seat_postions, \@seat_ids );
 
+    say "day 6";
+    my @declaration_form_answers = map {
+        {
+            map { $_ => 1 } grep { /[a-z]/ } split( //, $_ )
+        }
+    } get_input( 6, "\n\n" );
+
+    my $total_answers = sum0 (map {scalar keys %$_  } @declaration_form_answers);
+    say "Total Answers: $total_answers"
+
 }
+
 
 sub find_missing_seat_id ( $seat_positions, $seat_ids ) {
     my %seat_ids = map { $_ => 1 } @{$seat_ids};
